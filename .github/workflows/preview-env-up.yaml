@@ -1,0 +1,54 @@
+name: Preview Environment Provision
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Kubernetes CLI
+      uses: azure/setup-kubectl@v3
+      
+    - name: Authenticate to K8s Cluster
+      run: echo "Simulating K8s auth..." # e.g. via OIDC or KUBECONFIG
+      
+    - name: Set dynamic variables
+      id: vars
+      run: |
+        echo "namespace=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+        echo "url=https://pr-${{ github.event.pull_request.number }}.preview.example.com" >> $GITHUB_ENV
+
+    - name: Create Namespace
+      run: kubectl create namespace ${{ env.namespace }} --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Deploy Database Dependency
+      run: |
+        # Deploy a lightweight, disposable postgres instance for testing
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm upgrade --install preview-db bitnami/postgresql \
+          --namespace ${{ env.namespace }} \
+          --set auth.postgresPassword=temp_password
+
+    - name: Deploy Application
+      run: |
+        # Deploy the actual code from this PR
+        helm upgrade --install my-app ./charts/my-app \
+          --namespace ${{ env.namespace }} \
+          --set image.tag=${{ github.sha }} \
+          --set ingress.hosts[0].host=pr-${{ github.event.pull_request.number }}.preview.example.com
+
+    - name: Comment PR with URL
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🚀 **Preview Environment Deployed!**\n\nAccess your changes here: [${process.env.url}](${process.env.url})`
+          })

@@ -1,0 +1,30 @@
+name: Preview Environment Teardown
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  destroy-preview:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Authenticate to K8s Cluster
+      run: echo "Simulating K8s auth..." 
+
+    - name: Delete Namespace
+      run: |
+        NAMESPACE="pr-${{ github.event.pull_request.number }}"
+        echo "Destroying preview environment namespace: $NAMESPACE"
+        kubectl delete namespace $NAMESPACE --ignore-not-found=true
+
+    - name: Comment PR
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🗑️ **Preview Environment Destroyed.**\n\nResources for this PR have been cleaned up.`
+          })
