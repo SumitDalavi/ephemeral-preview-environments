@@ -45,6 +45,75 @@ The alternative is maintaining static "Dev1", "Dev2", and "QA" environments. Sta
 └── README.md
 ```
 
+
+## ðŸ“‹ Prerequisites
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| [GitHub Account](https://github.com/) | â€” | Repository hosting & Actions |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | >= 1.28 | Kubernetes CLI |
+| Kubernetes Cluster | Any | Target for preview environments |
+| [Helm](https://helm.sh/) | >= 3.x | Package manager |
+
+## ðŸš€ Step-by-Step Setup
+
+### Step 1: Fork the repository
+```bash
+# Fork on GitHub, then clone your fork
+git clone https://github.com/<YOUR_USERNAME>/ephemeral-preview-environments.git
+cd ephemeral-preview-environments
+```
+
+### Step 2: Configure GitHub Secrets
+In your forked repo, go to **Settings â†’ Secrets and Variables â†’ Actions** and add:
+
+| Secret | Value |
+|--------|-------|
+| `KUBE_CONFIG` | Base64-encoded kubeconfig for your cluster |
+| `DOCKER_REGISTRY` | Your container registry (e.g., `ghcr.io/username`) |
+
+### Step 3: Configure cluster access
+```bash
+# Ensure your cluster has an Ingress controller installed
+kubectl get ingressclass
+
+# If not, install NGINX Ingress
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm install ingress-nginx ingress-nginx/ingress-nginx
+```
+
+## ðŸ§ª Usage & Demo
+
+### Trigger a preview environment
+1. Create a new branch and make a code change
+2. Open a **Pull Request** on GitHub
+3. The `preview-env-up.yaml` workflow automatically:
+   - Creates a namespace `pr-<NUMBER>-preview`
+   - Builds and deploys the application
+   - Comments on the PR with the preview URL
+
+### Observe the environment
+```bash
+# List preview namespaces
+kubectl get namespaces | grep preview
+
+# Check resources in the preview namespace
+kubectl get all -n pr-<NUMBER>-preview
+```
+
+### Automatic teardown
+When the PR is **merged or closed**, the `preview-env-down.yaml` workflow automatically deletes the preview namespace and all resources.
+
+## âœ… Verification
+
+| Check | Action | Expected |
+|-------|--------|----------|
+| Workflow triggers | Open a PR | Actions tab shows running workflow |
+| Namespace created | `kubectl get ns \| grep preview` | pr-X-preview namespace |
+| App deployed | `kubectl get pods -n pr-X-preview` | Pod(s) running |
+| PR comment | Check PR thread | Preview URL posted |
+| Teardown | Close/merge PR | Namespace deleted |
+
 ## 👨‍💻 Author
 
 *Built to demonstrate Developer Experience (DevEx), CI/CD automation, and rapid feedback loops.*
