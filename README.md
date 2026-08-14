@@ -46,7 +46,7 @@ The alternative is maintaining static "Dev1", "Dev2", and "QA" environments. Sta
 ```
 
 
-## ðŸ“‹ Prerequisites
+## 📋 Prerequisites
 
 | Tool | Version | Purpose |
 |------|---------|---------|
@@ -55,7 +55,7 @@ The alternative is maintaining static "Dev1", "Dev2", and "QA" environments. Sta
 | Kubernetes Cluster | Any | Target for preview environments |
 | [Helm](https://helm.sh/) | >= 3.x | Package manager |
 
-## ðŸš€ Step-by-Step Setup
+## 🚀 Step-by-Step Setup
 
 ### Step 1: Fork the repository
 ```bash
@@ -82,7 +82,7 @@ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm install ingress-nginx ingress-nginx/ingress-nginx
 ```
 
-## ðŸ§ª Usage & Demo
+## 🧪 Usage & Demo
 
 ### Trigger a preview environment
 1. Create a new branch and make a code change
@@ -104,7 +104,7 @@ kubectl get all -n pr-<NUMBER>-preview
 ### Automatic teardown
 When the PR is **merged or closed**, the `preview-env-down.yaml` workflow automatically deletes the preview namespace and all resources.
 
-## âœ… Verification
+## ✅ Verification
 
 | Check | Action | Expected |
 |-------|--------|----------|
@@ -116,4 +116,9 @@ When the PR is **merged or closed**, the `preview-env-down.yaml` workflow automa
 
 ## 👨‍💻 Author
 
-*Built to demonstrate Developer Experience (DevEx), CI/CD automation, and rapid feedback loops.*
+**Sumit Dalavi** — Senior DevSecOps / Platform Engineer
+[GitHub](https://github.com/SumitDalavi) | [LinkedIn](https://in.linkedin.com/in/sumit-dalavi-762838129)
+
+---
+
+*Built with a focus on production-grade patterns, not toy demos.*
