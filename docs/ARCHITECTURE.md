@@ -1,5 +1,17 @@
 # Architecture: Ephemeral Preview Environments
 
+## System Diagram
+The following Mermaid.js sequence diagram maps the core workflow and interactions:
+
+```mermaid
+sequenceDiagram
+    PR->>Actions: Trigger
+Actions->>K8s: Create Namespace
+Actions->>Helm: Deploy Preview
+Actions->>PR: Comment URL
+```
+
+
 ## Core Lifecycle
 1. **Trigger**: The GitHub Action is hooked to `pull_request` events (`opened`, `synchronize`, `closed`).
 2. **Isolation**: K8s Namespaces are cheap. By dynamically creating a namespace formatted as `pr-<number>`, we ensure complete isolation from other PRs.
