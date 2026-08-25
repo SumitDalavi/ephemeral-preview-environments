@@ -10,13 +10,27 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Create Namespace
-      run: |
-        echo "Creating namespace pr-${{ github.event.pull_request.number }}"
-        kubectl create namespace pr-${{ github.event.pull_request.number }} --dry-run=client -o yaml | kubectl apply -f -
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-    - name: Deploy App
+    - name: Build Docker Image
+      uses: docker/build-push-action@v3
+      with:
+        context: ./app
+        push: false
+        tags: preview-api:pr-${{ github.event.pull_request.number }}
+        outputs: type=docker,dest=/tmp/preview-api.tar
+
+    - name: Create k8s Kind Cluster
+      uses: helm/kind-action@v1.4.0
+
+    - name: Load image into Kind
       run: |
-        echo "Deploying app to namespace pr-${{ github.event.pull_request.number }}"
-        # Mock deployment
-        kubectl apply -f k8s/deployment.yaml -n pr-${{ github.event.pull_request.number }}
+        kind load image-archive /tmp/preview-api.tar
+
+    - name: Deploy with Kustomize
+      run: |
+        kubectl create namespace pr-${{ github.event.pull_request.number }} --dry-run=client -o yaml | kubectl apply -f -
+        cd kustomize/overlays/preview
+        kustomize edit set image preview-api=preview-api:pr-${{ github.event.pull_request.number }}
+        kustomize build . | kubectl apply -n pr-${{ github.event.pull_request.number }} -f -
