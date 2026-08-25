@@ -1,0 +1,22 @@
+name: Deploy Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Create Namespace
+      run: |
+        echo "Creating namespace pr-${{ github.event.pull_request.number }}"
+        kubectl create namespace pr-${{ github.event.pull_request.number }} --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Deploy App
+      run: |
+        echo "Deploying app to namespace pr-${{ github.event.pull_request.number }}"
+        # Mock deployment
+        kubectl apply -f k8s/deployment.yaml -n pr-${{ github.event.pull_request.number }}

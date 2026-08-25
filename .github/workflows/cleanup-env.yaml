@@ -1,0 +1,14 @@
+name: Cleanup Preview Environment
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup-preview:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Delete Namespace
+      run: |
+        echo "Deleting namespace pr-${{ github.event.pull_request.number }}"
+        kubectl delete namespace pr-${{ github.event.pull_request.number }}
