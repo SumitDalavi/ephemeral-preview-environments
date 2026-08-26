@@ -1,0 +1,81 @@
+name: Ephemeral Preview Environments
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+jobs:
+  preview:
+    name: Manage Preview Environment
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Preview Environment
+        if: github.event.action != 'closed'
+        id: create
+        env:
+          BASE_DOMAIN: ${{ vars.BASE_DOMAIN || 'preview.example.com' }}
+          APP_IMAGE: ${{ vars.APP_IMAGE || 'ghcr.io/${{ github.repository }}' }}
+        run: |
+          node -e "
+          const { createEnvironment } = require('./controller/env-manager');
+          createEnvironment(
+            '${{ github.event.pull_request.number }}',
+            '${{ github.head_ref }}',
+            '${{ github.sha }}'
+          ).then(e => {
+            console.log('url=' + e.url);
+            require('fs').appendFileSync(process.env.GITHUB_OUTPUT, 'preview_url=' + e.url + '\n');
+          }).catch(e => { console.error(e); process.exit(1); });
+          "
+
+      - name: Comment Preview URL on PR
+        if: github.event.action != 'closed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.create.outputs.preview_url }}';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                '## Preview Environment Ready',
+                '',
+                `**URL:** ${url}`,
+                `**Branch:** \`${{ github.head_ref }}\``,
+                `**Commit:** \`${{ github.sha }}\``,
+                '',
+                '_This environment will be automatically deleted when the PR is closed._'
+              ].join('\n')
+            });
+
+      - name: Delete Preview Environment
+        if: github.event.action == 'closed'
+        run: |
+          node -e "
+          const { deleteEnvironment } = require('./controller/env-manager');
+          deleteEnvironment('${{ github.event.pull_request.number }}')
+            .then(r => console.log('Deleted:', JSON.stringify(r)))
+            .catch(e => { console.error(e); process.exit(1); });
+          "
