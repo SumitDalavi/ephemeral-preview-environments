@@ -1,6 +1,7 @@
 # Ephemeral Preview Environments Platform 🚀🗑️
 
-> A developer experience platform that dynamically provisions isolated Kubernetes environments for every Pull Request and automatically destroys them on merge, accelerating feedback loops.
+> **Maturity:** Lab / Reference Implementation
+> _A developer experience platform that dynamically provisions isolated Kubernetes environments for every Pull Request and automatically destroys them on merge, accelerating feedback loops._
 
 ## The Problem
 
@@ -119,6 +120,21 @@ When the PR is **merged or closed**, the `preview-env-down.yaml` workflow automa
 **Sumit Dalavi** — Senior DevSecOps / Platform Engineer
 [GitHub](https://github.com/SumitDalavi) | [LinkedIn](https://in.linkedin.com/in/sumit-dalavi-762838129)
 
----
+## 📚 Documentation
 
-*Built with a focus on production-grade patterns, not toy demos.*
+- [Architecture](docs/ARCHITECTURE.md) — System diagram and component details
+- [Runbook](docs/runbook.md) — Setup, commands, and expected outputs
+- [Decisions](docs/decisions.md) — ADRs for Ephemeral Environments
+- [Changelog](docs/changelog.md) — Change history
+
+## Mock Boundaries (Honest Scope)
+
+| What | Status | Details |
+|---|---|---|
+| Kubernetes Cluster | **Real** | Namespaces are fully provisioned and isolated in a local `kind` cluster. |
+| CI Pipeline (GitHub Actions) | **Mocked** | E2E demo simulates the GitHub Actions payload and API calls to comment on PRs. |
+| Ingress / DNS | **Mocked** | E2E demo simulates standard DNS provisioning via `/etc/hosts` for local testing. |
+
+## 🔗 Related Projects
+
+- [`multi-cluster-gitops-promotion`](../multi-cluster-gitops-promotion/) — Demonstrates promotion from these ephemeral environments up to Staging/Prod.
