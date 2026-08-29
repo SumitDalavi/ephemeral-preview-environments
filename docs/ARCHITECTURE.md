@@ -1,4 +1,5 @@
 # Architecture: Ephemeral Preview Environments
+> Maturity: Lab / Reference Implementation
 
 ## System Diagram
 The following Mermaid.js sequence diagram maps the core workflow and interactions:
