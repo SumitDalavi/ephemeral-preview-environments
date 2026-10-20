@@ -1,11 +1,12 @@
 > **NOTE:** This repository is an archival lab or partial prototype. It is not actively maintained and should not be used as a reference for production-grade deployments or performance benchmarks.
 
-
 # Ephemeral Preview Environments Platform 🚀🗑️
 
-[![Release](https://img.shields.io/github/v/release/SumitDalavi/ephemeral-preview-environments)](https://github.com/SumitDalavi/ephemeral-preview-environments/releases)
+[![CI Pipeline](https://github.com/SumitDalavi/ephemeral-preview-environments/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SumitDalavi/ephemeral-preview-environments/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/SumitDalavi/ephemeral-preview-environments?color=0969da&label=release&logo=github)](https://github.com/SumitDalavi/ephemeral-preview-environments/releases)
 [![Release Workflow](https://github.com/SumitDalavi/ephemeral-preview-environments/actions/workflows/release.yml/badge.svg)](https://github.com/SumitDalavi/ephemeral-preview-environments/actions/workflows/release.yml)
-
+[![SBOM](https://img.shields.io/badge/SBOM-SPDX%202.3-blueviolet?logo=spdx)](https://github.com/SumitDalavi/ephemeral-preview-environments/releases/tag/v0.2.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 > **Maturity:** Lab / Reference Implementation
 > _A developer experience platform that dynamically provisions isolated Kubernetes environments for every Pull Request and automatically destroys them on merge, accelerating feedback loops._
@@ -52,7 +53,6 @@ The alternative is maintaining static "Dev1", "Dev2", and "QA" environments. Sta
 ├── docs/ARCHITECTURE.md
 └── README.md
 ```
-
 
 ## 📋 Prerequisites
 
